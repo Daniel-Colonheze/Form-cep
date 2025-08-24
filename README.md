@@ -7,6 +7,6 @@ Entrada e validação de CEP
 
 Requisição à API ViaCEP
 
-Exibição automática dos dados do endereço
+Exibição automática dos dados do endereço Rua, Bairro, Cidade, Estado e Região
 
 Tecnologias: HTML, CSS e JavaScript
