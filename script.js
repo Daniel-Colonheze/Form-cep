@@ -1,40 +1,38 @@
-// MAPEAR CAMPOS
+const cepInput = document.querySelector("#cep");
+const form = document.querySelector("#cepForm");
 
-let campoCep = document.querySelector("#cep")
+// deixar só números no CEP
+cepInput.addEventListener("input", () => {
+    cepInput.value = cepInput.value.replace(/\D/g, "");
+});
 
-// Sanitizando o campo somente numeros
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-campoCep.addEventListener("input", () => {
-    campoCep.value = campoCep.value.replace(/[^0-9]/g, "")
-})
+    const cep = cepInput.value;
 
-// Ver quando o usuario saiu do campo cep
+    if (cep.length !== 8) {
+        alert("Digite um CEP com 8 números.");
+        return;
+    }
 
-campoCep.addEventListener("blur", () => {
+    try {
+        const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const dados = await resposta.json();
 
-    if (campoCep.value.length !== 8) {
-        alert("Coloque um CEP válido")
-    } else {
-        fetch(`https://viacep.com.br/ws/${campoCep.value}/json`)
-            .then(resposta => {
-                if (!resposta.ok) {
-                    throw new Error("Erro no  status do servidor" + resposta.status)
-                }
-                return resposta.json();
-            })
-            .then(data => {
-                if (data.erro) {
-                    alert("Cep nao encontrado, insira um cep válido!")
-                    } else {
-                        for(chave in data){
-                            if(document.querySelector("#" + chave)){
-                                document.querySelector("#" + chave).value = data[chave]
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                });
-            }
-    });
+        if (dados.erro) {
+            alert("CEP não encontrado!");
+            return;
+        }
+
+        document.querySelector("#logradouro").value = dados.logradouro || "";
+        document.querySelector("#bairro").value = dados.bairro || "";
+        document.querySelector("#localidade").value = dados.localidade || "";
+        document.querySelector("#uf").value = dados.uf || "";
+        document.querySelector("#regiao").value = dados.regiao || "";
+
+    } catch (err) {
+        alert("Erro ao buscar o CEP. Tente de novo mais tarde.");
+        console.error(err);
+    }
+});
