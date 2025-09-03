@@ -1,12 +1,11 @@
 const cepInput = document.querySelector("#cep");
 const form = document.querySelector("#cepForm");
 
-// deixar só números no CEP
 cepInput.addEventListener("input", () => {
     cepInput.value = cepInput.value.replace(/\D/g, "");
 });
 
-form.addEventListener("submit", async (e) => {
+form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const cep = cepInput.value;
@@ -16,23 +15,27 @@ form.addEventListener("submit", async (e) => {
         return;
     }
 
-    try {
-        const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const dados = await resposta.json();
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+        .then((resposta) => {
+            if (!resposta.ok) {
+                throw new Error("Erro na requisição");
+            }
+            return resposta.json();
+        })
+        .then((dados) => {
+            if (dados.erro) {
+                alert("CEP não encontrado!");
+                return;
+            }
 
-        if (dados.erro) {
-            alert("CEP não encontrado!");
-            return;
-        }
-
-        document.querySelector("#logradouro").value = dados.logradouro || "";
-        document.querySelector("#bairro").value = dados.bairro || "";
-        document.querySelector("#localidade").value = dados.localidade || "";
-        document.querySelector("#uf").value = dados.uf || "";
-        document.querySelector("#regiao").value = dados.regiao || "";
-
-    } catch (err) {
-        alert("Erro ao buscar o CEP. Tente de novo mais tarde.");
-        console.error(err);
-    }
+            document.querySelector("#logradouro").value = dados.logradouro || "";
+            document.querySelector("#bairro").value = dados.bairro || "";
+            document.querySelector("#localidade").value = dados.localidade || "";
+            document.querySelector("#uf").value = dados.uf || "";
+            document.querySelector("#regiao").value = dados.regiao || "";
+        })
+        .catch((err) => {
+            alert("Erro ao buscar o CEP. Tente de novo mais tarde.");
+            console.error(err);
+        });
 });
